@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "memdex"
+version = "0.1.0"
+authors = [
+  { name="Andrey Malyshev", email="malyshev.andrey.d@gmail.com" }
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+  "pytesseract>=0.3.10",
+  "pandas>=2.2.2",
+  "requests>=2.31.0",
+  "open-clip-torch>=2.24.0",
+  "pillow>=10.3.0",
+  "tqdm>=4.66.2",
+  "telethon>=1.33.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/malyshev-andrey/memdex"
+
+[tool.hatch.build.targets.wheel]
+packages = ["memdex"]
