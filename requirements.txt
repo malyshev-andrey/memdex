@@ -1,0 +1,8 @@
+pytesseract>=0.3.10
+pandas>=2.2.2
+requests>=2.31.0
+open-clip-torch>=2.24.0
+pillow>=10.3.0
+tqdm>=4.66.2
+telethon>=1.33.1
+joblib>=1.2.0
