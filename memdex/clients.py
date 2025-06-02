@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from time import monotonic, sleep
 import itertools
+from functools import cache
 
 import requests
 from tqdm.auto import tqdm
@@ -14,6 +15,7 @@ class VKGroupClient:
     rate_limit: float = 3  # max requests per second
     _last_call_time: float = float('-inf')
 
+    @cache
     def _get_response(self, url: str, params: dict) -> dict:
         params = dict(
             access_token=self.access_token,
