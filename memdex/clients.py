@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from time import monotonic, sleep
 import itertools
 from functools import cache
+from urllib.parse import urlencode
 
 import requests
 from tqdm.auto import tqdm
@@ -16,20 +17,24 @@ class VKGroupClient:
     _last_call_time: float = float('-inf')
 
     @cache
+    def _make_request(self, url: str) -> requests.Response:
+        delta = monotonic() - self._last_call_time
+        if delta < 1 / self.rate_limit:
+            sleep(1 / self.rate_limit - delta)
+        self._last_call_time = monotonic()
+
+        response = requests.get(url)
+        response.raise_for_status()
+        return response
+
     def _get_response(self, url: str, params: dict) -> dict:
         params = dict(
             access_token=self.access_token,
             v=self.api_version,
             **params
         )
-
-        delta = monotonic() - self._last_call_time
-        if delta < 1 / self.rate_limit:
-            sleep(1 / self.rate_limit - delta)
-        self._last_call_time = monotonic()
-
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+        url = url.removesuffix('/')
+        response = self._make_request(f'{url}?{urlencode(params)}')
         response = response.json()
         response = response['response']
 
