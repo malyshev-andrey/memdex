@@ -49,6 +49,9 @@ class VKGroupClient:
     def __post_init__(self):
         self.owner_id = self._get_owner_id()
 
+    def __hash__(self):
+        return hash((self.name, self.api_version))
+
     def _get_items(self, url: str, params: dict, *, unit: str|None = None) -> list[dict]:
         results = []
         total = self._get_response(url, params)['count']
