@@ -1,4 +1,7 @@
 import pandas as pd
+from telethon.sync import TelegramClient
+from telethon.tl.types import InputMessagesFilterPhotos
+from tqdm.auto import tqdm
 
 from .clients import VKGroupClient
 from .config import config
@@ -54,6 +57,7 @@ def _get_vk_group_photos_metadata(client: VKGroupClient) -> pd.DataFrame:
 
     return result
 
+
 def get_vk_photos_metadata():
     result = []
     for group in config['vk']['groups']:
@@ -62,6 +66,27 @@ def get_vk_photos_metadata():
             name=group,
             api_version=config['vk']['api_version']
         )
-        result.append(_get_vk_group_photos_metadata(client))
+        metadata = _get_vk_group_photos_metadata(client)
+        metadata['group'] = group
+        result.append(metadata)
     result = pd.concat(result)
+    return result
+
+
+async def get_telegram_photos_metadata() -> pd.DataFrame:
+    result = []
+    api_id = config['telegram']['api_id']
+    api_hash = config['telegram']['api_hash']
+    async with TelegramClient('memdex_metadata', api_id, api_hash) as client:
+        for channel in config['telegram']['channels']:
+            total = (await client.get_messages(channel, 0, filter=InputMessagesFilterPhotos)).total
+            messages = client.iter_messages(channel, filter=InputMessagesFilterPhotos)
+            async for msg in tqdm(messages, total=total, unit='message'):
+                result.append(dict(
+                    group=channel,
+                    date=int(msg.date.timestamp()),
+                    post_id=msg.id,
+                    id=1
+                ))
+    result = pd.DataFrame(result)
     return result
